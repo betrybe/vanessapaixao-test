@@ -32,9 +32,11 @@ function getSkuFromProductItem(item) {
 }
 
 function cartItemClickListener(event) {
-  // coloque seu código aqui-
-
-
+  if (event.target.hasAttribute('sku')){
+    let sku = event.target.getAttribute('sku');
+    carrinho = carrinho.filter(x => x.sku!=sku);
+    event.target.parentElement.removeChild(event.target);
+  }
 }
 
 function createCartItemElement({ sku, name, salePrice }) {
@@ -42,18 +44,18 @@ function createCartItemElement({ sku, name, salePrice }) {
   li.className = 'cart__item';
   li.innerText = `SKU: ${sku} | NAME: ${name} | PRICE: $${salePrice}`;
   li.addEventListener('click', cartItemClickListener);
+  li.setAttribute('sku',sku);
   return li;
 }
 
 //Função de adicionar item no carrinho
 async function productClickListener(event) {
-  //createCartItemElement();
   const sku = getSkuFromProductItem(event.target.parentElement);
   const product = await findBySKU(sku);
-  console.log(product);
   const item = createCartItemElement(product);
   let lista = document.getElementsByClassName("cart__items");
   lista[0].appendChild(item);
+  carrinho.push(product);
 }
 
 //Funções para busca de dados e organização
@@ -71,6 +73,8 @@ async function findBySKU(sku) {
   let data = await response.json();
   return {sku:data.id,name:data.title,image:data.thumbnail,salePrice:data.price};
 }
+
+var carrinho =[];
 
 window.onload = async () => {
   let resultado = await returnProducts();
