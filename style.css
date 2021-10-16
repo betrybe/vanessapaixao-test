@@ -1,4 +1,4 @@
-*{
+* {
   font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
@@ -56,10 +56,10 @@
 
 }
 
-.cart .cart_body{
+.cart .cart_body {
   display: flex;
   flex-flow: column wrap;
-  height: auto !important;
+  height: auto;
   border: 2px solid blue;
   border-radius: 5px;
   padding: 15px;
@@ -72,7 +72,7 @@
   padding-bottom: 10px;
 }
 
-.empty-cart{
+.empty-cart {
   width: 90%;
   margin-left: 5%;
 }
@@ -81,15 +81,15 @@
   font-size: 25pt;
   text-align: center;
   color: aliceblue;
-  position:absolute;
-	left:50%;
-	top:50%;
+  position: absolute;
+  left: 50%;
+  top: 50%;
   width: 180px;
   height: 40px;
-  margin-left:-180px;
-	margin-top:-40px;
+  margin-left: -180px;
+  margin-top: -40px;
   padding: 5px;
   border-radius: 5%;
   border: 2px solid blue;
   background-color: green;
-  }
+}
