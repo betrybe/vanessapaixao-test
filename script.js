@@ -1,11 +1,14 @@
-function showLoading(){
-  let overlay = document.getElementsByClassName('loading')
-  overlay[0].style.display = 'block';
+function showLoading() {
+  const e = document.createElement('div');
+  e.className = 'loading';
+  e.innerText = 'Loading...';
+  const cart = document.getElementsByClassName('cart')
+  cart[0].appendChild(e);
 }
 
 function hideLoading(){
-  let overlay = document.getElementsByClassName('loading')
-  overlay[0].style.display = 'none';
+  let cart = document.getElementsByClassName('cart')
+  cart[0].removeChild(cart[0].lastChild)
 }
 
 function createProductImageElement(imageSource) {
