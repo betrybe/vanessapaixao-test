@@ -11,15 +11,7 @@ function hideLoading() {
   cart[0].removeChild(cart[0].lastChild);
 }
 
-function getSkuFromProductItem(item) {
-  return item.querySelector('span.item__sku').innerText;
-}
-
-async function findBySKU(sku) {
-  showLoading();
-  const response = await fetch(`https://api.mercadolibre.com/items/${sku}`);
-  const data = await response.json();
-  hideLoading();
+function returnObject(data) {
   return {
     sku: data.id,
     name: data.title,
@@ -28,16 +20,27 @@ async function findBySKU(sku) {
   };
 }
 
-async function calculatePrice() {
+async function findBySKU(sku) {
+  showLoading();
+  const response = await fetch(`https://api.mercadolibre.com/items/${sku}`);
+  const data = await response.json();
+  hideLoading();
+  return returnObject(data);
+}
+
+function getSkuFromProductItem(item) {
+  return item.querySelector('span.item__sku').innerText;
+}
+
+function calculatePrice() {
   let soma = 0;
   for (let i = 0; i < localStorage.length; i += 1) {
     const sku = localStorage.key(i);
     const product = JSON.parse(localStorage.getItem(sku));
     soma += product.salePrice;
   }
-
-  const lista = document.getElementsByClassName('total-price');
-  lista[0].innerHTML = soma;
+  const preco = document.getElementsByClassName('total-price')[0];
+  preco.innerHTML = soma;
 }
 
 function cartItemClickListener(event) {
@@ -45,7 +48,6 @@ function cartItemClickListener(event) {
     const sku = event.target.getAttribute('sku');
     localStorage.removeItem(sku);
     event.target.parentElement.removeChild(event.target);
-    calculatePrice();
   }
 }
 
@@ -58,7 +60,6 @@ function createCartItemElement({ sku, name, salePrice }) {
   return li;
 }
 
-// Função de adicionar item no carrinho
 async function productClickListener(event) {
   const sku = getSkuFromProductItem(event.target.parentElement);
   const product = await findBySKU(sku);
@@ -67,7 +68,6 @@ async function productClickListener(event) {
     const lista = document.getElementsByClassName('cart__items');
     lista[0].appendChild(item);
     localStorage.setItem(product.sku, JSON.stringify(product));
-    calculatePrice();
   } else {
     alert(`O produto ${product.name} já está no carrinho.`);
   }
@@ -98,7 +98,6 @@ function createCustomElement(
 function createProductItemElement({ sku, name, image }) {
   const section = document.createElement('section');
   section.className = 'item';
-
   section.appendChild(createCustomElement('span', 'item__sku', sku));
   section.appendChild(createCustomElement('span', 'item__title', name));
   section.appendChild(createProductImageElement(image));
@@ -114,8 +113,6 @@ function createProductItemElement({ sku, name, image }) {
   return section;
 }
 
-// Funções para busca de dados e organização
-
 async function returnProducts() {
   showLoading();
   const response = await fetch(
@@ -124,52 +121,47 @@ async function returnProducts() {
   const data = await response.json();
   const results = [];
   data.results.forEach((element) => {
-    results.push({
-      sku: element.id,
-      name: element.title,
-      image: element.thumbnail,
-      salePrice: element.price,
-    });
+    results.push(returnObject(element));
   });
   hideLoading();
   return results;
 }
 
-// Função que recupera os itens do localStorage
-async function populateCart() {
+function populateCart() {
   if (localStorage.length > 0) {
     for (let i = 0; i < localStorage.length; i += 1) {
       const sku = localStorage.key(i);
       const product = JSON.parse(localStorage.getItem(sku));
       const item = createCartItemElement(product);
-      const lista = document.getElementsByClassName('cart__items');
-      lista[0].appendChild(item);
+      const carrinho = document.getElementsByClassName('cart__items')[0];
+      carrinho.appendChild(item);
     }
   }
 }
 
-// Função para esvaziar o carrinho
-
 function clearCart() {
-  const lista = document.getElementsByClassName('cart__items');
+  const carrinho = document.getElementsByClassName('cart__items')[0];
+  carrinho.innerHTML = '';
   localStorage.clear();
-  lista[0].innerHTML = '';
-  calculatePrice();
 }
 
-// Fução para soma dos preços do carrinho
+function setClearCartListener() {
+  const clearButton = document.getElementsByClassName('empty-cart')[0];
+  clearButton.addEventListener('click', clearCart);
+}
+
+function populateItems(products) {
+  const lista = document.getElementsByClassName('items')[0];
+  products.forEach((element) => {
+    const objeto = createProductItemElement(element);
+    lista.appendChild(objeto);
+  });
+}
 
 window.onload = async () => {
   const resultado = await returnProducts();
-  const lista = document.getElementsByClassName('items');
-  const clearButton = document.getElementsByClassName('empty-cart');
-  clearButton[0].addEventListener('click', clearCart);
-  resultado.forEach((element) => {
-    const objeto = createProductItemElement(element);
-    lista[0].appendChild(objeto);
-  });
-  showLoading();
+  populateItems(resultado);
+  setClearCartListener();
   populateCart();
-  calculatePrice();
-  hideLoading();
+  window.setInterval(calculatePrice, 2000);
 };
