@@ -151,11 +151,13 @@ function setClearCartListener() {
 }
 
 function populateItems(products) {
+  showLoading();
   const lista = document.getElementsByClassName('items')[0];
   products.forEach((element) => {
     const objeto = createProductItemElement(element);
     lista.appendChild(objeto);
   });
+  hideLoading();
 }
 
 window.onload = async () => {
