@@ -1,3 +1,13 @@
+function showLoading(){
+  let overlay = document.getElementsByClassName('loading')
+  overlay[0].style.display = 'block';
+}
+
+function hideLoading(){
+  let overlay = document.getElementsByClassName('loading')
+  overlay[0].style.display = 'none';
+}
+
 function createProductImageElement(imageSource) {
   const img = document.createElement('img');
   img.className = 'item__image';
@@ -34,8 +44,9 @@ function getSkuFromProductItem(item) {
 function cartItemClickListener(event) {
   if (event.target.hasAttribute('sku')){
     let sku = event.target.getAttribute('sku');
-    carrinho = carrinho.filter(x => x.sku!=sku);
+    localStorage.removeItem(sku);
     event.target.parentElement.removeChild(event.target);
+    calculatePrice();
   }
 }
 
@@ -55,26 +66,64 @@ async function productClickListener(event) {
   const item = createCartItemElement(product);
   let lista = document.getElementsByClassName("cart__items");
   lista[0].appendChild(item);
-  carrinho.push(product);
+  localStorage.setItem(product.sku,JSON.stringify(product));
+  calculatePrice();
 }
 
 //Funções para busca de dados e organização
 
 async function returnProducts(){
+  showLoading();
   let response = await fetch ("https://api.mercadolibre.com/sites/MLB/search?q=computador")
   let data = await response.json();
   let results =[];
   data.results.forEach(element=>{results.push({sku:element.id,name:element.title,image:element.thumbnail,salePrice:element.price})})
+  hideLoading();
   return results;
 }
 
 async function findBySKU(sku) {
+  showLoading();
   let response = await fetch (`https://api.mercadolibre.com/items/${sku}`)
   let data = await response.json();
+  hideLoading();
   return {sku:data.id,name:data.title,image:data.thumbnail,salePrice:data.price};
 }
 
-var carrinho =[];
+//Função que recupera os itens do localStorage
+async function populateCart(){
+  if(localStorage.length>0){
+    for (var i = 0; i<localStorage.length; i++) {
+      let sku = localStorage.key(i);
+      const product = await findBySKU(sku);
+      const item = createCartItemElement(product);
+      let lista = document.getElementsByClassName("cart__items");
+      lista[0].appendChild(item);
+    }
+  }
+}
+
+// Função para esvaziar o carrinho
+
+function clearCart(){
+  let lista = document.getElementsByClassName("cart__items");
+  localStorage.clear();
+  lista[0].innerHTML='';
+  calculatePrice();
+}
+
+// Fução para soma dos preços do carrinho
+
+async function calculatePrice(){
+  let soma=0;
+  for (var i = 0; i<localStorage.length; i++) {
+    let sku = localStorage.key(i);
+    const product = await findBySKU(sku);
+    soma=soma+product.salePrice;
+  }
+  let lista = document.getElementsByClassName("total-price");
+  lista[0].innerHTML=soma;
+}
 
 window.onload = async () => {
   let resultado = await returnProducts();
@@ -83,4 +132,6 @@ window.onload = async () => {
     let objeto = createProductItemElement(element);
     lista[0].appendChild(objeto);
   });
+  populateCart();
+  calculatePrice();
 };

@@ -10,6 +10,7 @@
   </head>
 
   <body>
+    <div class='loading'>Loading...</div>
     <section class="container">
       <section class="items">
 
@@ -17,8 +18,9 @@
       </section>
       <section class="cart">
         <span class="cart__title">Carrinho de compras</span>
-        <button class="empty-cart">Esvaziar carrinho</button>
-        <ol class="cart__items"></ol>
+        <button class="empty-cart" onclick="clearCart()">Esvaziar carrinho</button>
+        <ul class="cart__items"></ul>
+        <div>Preço total: $<span class="total-price"></span></div>
       </section>
     </section>
   </body>
